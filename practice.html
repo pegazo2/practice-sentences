@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Practicar Oraciones Guardadas</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #6b8dd6 0%, #a6c1ee 100%);
+      margin: 0;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      color: #2c3e50;
+    }
+    h2 {
+      margin-bottom: 1rem;
+      font-weight: 700;
+      text-shadow: 1px 1px 3px rgba(0,0,0,0.1);
+    }
+    #sentenceCounter {
+      margin-top: 1rem;
+      font-size: 18px;
+      color: #34495e;
+      font-weight: 600;
+    }
+    input[type="text"] {
+      width: 100%;
+      max-width: 600px;
+      padding: 0.75rem 1rem;
+      font-size: 16px;
+      margin: 1.5rem 0;
+      border: none;
+      border-radius: 10px;
+      box-shadow: inset 2px 2px 6px rgba(0,0,0,0.1);
+      transition: box-shadow 0.3s ease;
+    }
+    input[type="text"]:focus {
+      outline: none;
+      box-shadow: inset 2px 2px 10px #3498db;
+    }
+    button {
+      padding: 0.6rem 1.5rem;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      background-color: #2980b9;
+      color: white;
+      margin: 0.3rem;
+      cursor: pointer;
+      box-shadow: 0 4px 8px rgba(41, 128, 185, 0.4);
+      transition: background-color 0.3s, box-shadow 0.3s;
+      font-weight: 600;
+      user-select: none;
+    }
+    button:hover {
+      background-color: #1c5d8b;
+      box-shadow: 0 6px 14px rgba(28, 93, 139, 0.6);
+    }
+    #output {
+      margin-top: 1rem;
+      max-width: 700px;
+      padding: 1.2rem;
+      background: #ffffffcc;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      min-height: 60px;
+      min-width: 300px;
+      justify-content: flex-start;
+      transition: background-color 0.3s ease;
+      white-space: pre-wrap;
+      font-size: 16px;
+      color: #155724;
+    }
+  </style>
+</head>
+<body>
+  <h2>📚 Practicar Oraciones Guardadas</h2>
+  <div id="sentenceCounter">Cargando oraciones guardadas...</div>
+
+  <input
+    type="text"
+    id="userInput"
+    placeholder="Escribe la oración completa aquí"
+    autocomplete="off"
+    disabled
+  />
+
+  <div id="output"></div>
+
+  <div>
+    <button onclick="revealSentence()" id="btnReveal" disabled>Revelar oración</button>
+    <button onclick="repeatSentenceNormal()" id="btnRepeatNormal" disabled>Repetir oración (normal)</button>
+    <button onclick="repeatSentenceSlow()" id="btnRepeatSlow" disabled>Repetir oración (lenta)</button>
+  </div>
+
+<script>
+  let savedSentences = [];
+  let current = 0;
+
+  window.onload = function() {
+    const savedData = localStorage.getItem('savedSentences');
+    if (!savedData) {
+      alert('No tienes oraciones guardadas para practicar. Vuelve a la página principal y guarda algunas.');
+      document.getElementById('sentenceCounter').textContent = 'No hay oraciones guardadas.';
+      return;
+    }
+    savedSentences = JSON.parse(savedData);
+    if (!savedSentences.length) {
+      alert('No tienes oraciones guardadas para practicar. Vuelve a la página principal y guarda algunas.');
+      document.getElementById('sentenceCounter').textContent = 'No hay oraciones guardadas.';
+      return;
+    }
+    document.getElementById('userInput').disabled = false;
+    document.getElementById('userInput').focus();
+    enableButtons(true);
+    updateCounter();
+    speakSentence(savedSentences[current], 1);
+  };
+
+  function updateCounter() {
+    const counter = document.getElementById('sentenceCounter');
+    if (current < savedSentences.length) {
+      counter.textContent = `Oración a escribir: ${current + 1} de ${savedSentences.length}`;
+    } else {
+      counter.textContent = '¡Has completado todas las oraciones guardadas! 🎉';
+      document.getElementById('userInput').disabled = true;
+      enableButtons(false);
+    }
+  }
+
+  function normalize(str) {
+    return str.replace(/\s+/g, ' ').trim().toLowerCase();
+  }
+
+  document.getElementById('userInput').addEventListener('input', () => {
+    if (current >= savedSentences.length) return;
+
+    const input = normalize(document.getElementById('userInput').value);
+    const target = normalize(savedSentences[current]);
+
+    if (input === target) {
+      // Mostrar en output
+      const output = document.getElementById('output');
+      output.textContent += savedSentences[current] + '\n\n';
+
+      current++;
+      updateCounter();
+      document.getElementById('userInput').value = '';
+
+      if (current < savedSentences.length) {
+        speakSentence(savedSentences[current], 1);
+      } else {
+        alert('¡Felicidades! Completaste todas las oraciones guardadas.');
+      }
+    }
+  });
+
+  function speakSentence(text, rate=1) {
+    if (!('speechSynthesis' in window)) {
+      alert('Este navegador no soporta síntesis de voz.');
+      return;
+    }
+    speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'en-US';
+    utterance.rate = rate;
+    speechSynthesis.speak(utterance);
+  }
+
+  function revealSentence() {
+    if (current < savedSentences.length) {
+      alert('La oración es:\n' + savedSentences[current]);
+    }
+  }
+
+  function repeatSentenceNormal() {
+    if (current < savedSentences.length) {
+      speakSentence(savedSentences[current], 1);
+    }
+  }
+
+  function repeatSentenceSlow() {
+    if (current < savedSentences.length) {
+      speakSentence(savedSentences[current], 0.6);
+    }
+  }
+
+  function enableButtons(enabled) {
+    document.getElementById('btnReveal').disabled = !enabled;
+    document.getElementById('btnRepeatNormal').disabled = !enabled;
+    document.getElementById('btnRepeatSlow').disabled = !enabled;
+  }
+</script>
+</body>
+</html>
