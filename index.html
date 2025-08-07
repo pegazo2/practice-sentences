@@ -185,6 +185,7 @@ ul#savedSentences li button.deleteBtn:hover {
     <button onclick="repeatSentenceNormal()">Repetir oración (normal)</button>
     <button onclick="repeatSentenceSlow()">Repetir oración (lenta)</button>
     <button onclick="saveSentence()" disabled id="saveBtn">Guardar oración</button>
+    <button onclick="openPractice()">Practicar oraciones guardadas</button>
   </div>
 
   <div id="sentenceCounter"></div>
@@ -375,21 +376,26 @@ ul#savedSentences li button.deleteBtn:hover {
   }
 
   function updateSavedCount() {
-    document.getElementById('savedCount').textContent = `Oraciones guardadas: ${saved.length}`;
-  }
+  document.getElementById('savedCount').textContent = `Oraciones guardadas: ${saved.length}`;
+}
 
-  function downloadSentences() {
-    if (saved.length === 0) {
-      alert('No hay oraciones guardadas para descargar.');
-      return;
-    }
-    const text = saved.join('\n\n');
-    const blob = new Blob([text], { type: 'text/plain' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = 'oraciones_guardadas.txt';
-    link.click();
+function downloadSentences() {
+  if (saved.length === 0) {
+    alert('No hay oraciones guardadas para descargar.');
+    return;
   }
+  const text = saved.join('\n\n');
+  const blob = new Blob([text], { type: 'text/plain' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = 'oraciones_guardadas.txt';
+  link.click();
+}
+
+function openPractice() {
+  window.open('practice.html', '_blank');
+}
+
 </script>
 </body>
 </html>
