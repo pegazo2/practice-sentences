@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Song Sentence Trainer with Practice</title>
+  <style>
+   body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #6b8dd6 0%, #a6c1ee 100%);
+  margin: 0;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  color: #2c3e50;
+}
+
+h2 {
+  margin-bottom: 1rem;
+  font-weight: 700;
+  text-shadow: 1px 1px 3px rgba(0,0,0,0.1);
+}
+
+textarea {
+  width: 100%;
+  max-width: 600px;
+  height: 150px;
+  padding: 1rem;
+  font-size: 16px;
+  border: none;
+  border-radius: 10px;
+  box-shadow: inset 2px 2px 5px rgba(0,0,0,0.1);
+  margin-bottom: 1.2rem;
+  resize: vertical;
+  transition: box-shadow 0.3s ease;
+}
+
+textarea:focus {
+  outline: none;
+  box-shadow: inset 2px 2px 8px #2980b9;
+}
+
+#sentenceCounter {
+  margin-top: 1rem;
+  font-size: 18px;
+  color: #34495e;
+  font-weight: 600;
+}
+
+input[type="text"] {
+  width: 100%;
+  max-width: 600px;
+  padding: 0.75rem 1rem;
+  font-size: 16px;
+  margin: 1.5rem 0;
+  border: none;
+  border-radius: 10px;
+  box-shadow: inset 2px 2px 6px rgba(0,0,0,0.1);
+  transition: box-shadow 0.3s ease;
+}
+
+input[type="text"]:focus {
+  outline: none;
+  box-shadow: inset 2px 2px 10px #3498db;
+}
+
+button {
+  padding: 0.6rem 1.5rem;
+  font-size: 16px;
+  border: none;
+  border-radius: 8px;
+  background-color: #2980b9;
+  color: white;
+  margin: 0.3rem;
+  cursor: pointer;
+  box-shadow: 0 4px 8px rgba(41, 128, 185, 0.4);
+  transition: background-color 0.3s, box-shadow 0.3s;
+  font-weight: 600;
+  user-select: none;
+}
+
+button:hover {
+  background-color: #1c5d8b;
+  box-shadow: 0 6px 14px rgba(28, 93, 139, 0.6);
+}
+
+#output {
+  margin-top: 1rem;
+  max-width: 700px;
+  padding: 1.2rem;
+  background: #ffffffcc;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 100px;
+  min-width: 300px;
+  justify-content: flex-start;
+  transition: background-color 0.3s ease;
+  white-space: pre-wrap;
+}
+
+.correct {
+  background-color: #d4edda;
+  color: #155724;
+  padding: 8px 12px;
+  border-radius: 8px;
+  box-shadow: 1px 1px 8px #27ae6011;
+  font-size: 16px;
+}
+
+h3 {
+  margin-top: 2.5rem;
+  color: #2c3e50;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+ul#savedSentences {
+  list-style: none;
+  padding: 10px 15px;
+  max-width: 600px;
+  margin-top: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border: 1.5px solid #ccc;
+  border-radius: 10px;
+  background: #fff9e6;
+  box-shadow: inset 1px 1px 5px rgba(243, 156, 18, 0.1);
+  max-height: 200px;
+  overflow-y: auto;
+  font-size: 15px;
+  color: #7f6000;
+}
+
+ul#savedSentences li {
+  background: #fdf6e3;
+  border: 1.5px solid #f0e2b6;
+  padding: 10px 14px;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  word-break: break-word;
+}
+
+ul#savedSentences li button {
+  margin-left: 8px;
+  padding: 5px 10px;
+  font-size: 14px;
+  border-radius: 6px;
+  border: none;
+  background-color: #2980b9;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  user-select: none;
+}
+
+ul#savedSentences li button:hover {
+  background-color: #1c5d8b;
+}
+
+ul#savedSentences li button.deleteBtn {
+  background-color: #e74c3c;
+}
+
+ul#savedSentences li button.deleteBtn:hover {
+  background-color: #b73128;
+}
+
+  </style>
+</head>
+<body>
+  <h2>🎵 Song Sentence Trainer with Practice</h2>
+  <p>Pega la letra de la canción (en inglés), con oraciones:</p>
+  <textarea id="lyrics" placeholder="Escribe o pega varias oraciones aquí..."></textarea><br />
+  <div>
+    <button onclick="startTraining()">Iniciar</button>
+    <button onclick="revealSentence()">Revelar oración</button>
+    <button onclick="repeatSentenceNormal()">Repetir oración (normal)</button>
+    <button onclick="repeatSentenceSlow()">Repetir oración (lenta)</button>
+    <button onclick="saveSentence()" disabled id="saveBtn">Guardar oración</button>
+  </div>
+
+  <div id="sentenceCounter"></div>
+
+  <input
+    type="text"
+    id="userInput"
+    placeholder="Escribe la oración completa aquí"
+    oninput="checkSentence()"
+    autocomplete="off"
+    disabled
+  />
+
+  <div id="output"></div>
+
+  <h3>📌 Oraciones guardadas para practicar:</h3>
+  <ul id="savedSentences"></ul>
+  <p id="savedCount" style="margin-top: 0.5rem;">Oraciones guardadas: 0</p>
+  <button onclick="downloadSentences()">⬇️ Descargar oraciones guardadas (.txt)</button>
+
+<script>
+  let sentences = [];
+  let current = 0;
+  let saved = [];
+
+  // Cargar oraciones guardadas al inicio
+  window.onload = function () {
+    const savedData = localStorage.getItem('savedSentences');
+    if (savedData) {
+      saved = JSON.parse(savedData);
+      renderSavedSentences();
+    }
+    updateSavedCount();
+  };
+
+  function startTraining() {
+    const lyrics = document.getElementById('lyrics').value.trim();
+    if (!lyrics) {
+      alert('Por favor pega la letra antes de iniciar.');
+      return;
+    }
+    // Dividir en oraciones
+    sentences = lyrics.match(/[^.!?]+[.!?]+[\])'"`’”]*|[^.!?]+$/g);
+    if (!sentences || sentences.length === 0) {
+      alert('No se detectaron oraciones válidas.');
+      return;
+    }
+
+    sentences = sentences.map(s => s.trim());
+    current = 0;
+    document.getElementById('output').innerHTML = '';
+    document.getElementById('userInput').value = '';
+    document.getElementById('userInput').disabled = false;
+    document.getElementById('saveBtn').disabled = true;
+    document.getElementById('userInput').focus();
+    updateCounter();
+    speakSentence(sentences[current], 1);
+  }
+
+  function updateCounter() {
+    const counter = document.getElementById('sentenceCounter');
+    if (current < sentences.length) {
+      counter.textContent = `Oración a escribir: ${current + 1} de ${sentences.length}`;
+    } else {
+      counter.textContent = '¡Has completado todas las oraciones! 🎉';
+      document.getElementById('saveBtn').disabled = true;
+      document.getElementById('userInput').disabled = true;
+    }
+  }
+
+  function checkSentence() {
+    if (current >= sentences.length) return;
+
+    const input = document.getElementById('userInput').value.trim().toLowerCase();
+    const target = sentences[current].toLowerCase();
+
+    const normalize = str => str.replace(/\s+/g, ' ').trim();
+
+    if (normalize(input) === normalize(target)) {
+      // Mostrar oración correcta
+      const output = document.getElementById('output');
+      const div = document.createElement('div');
+      div.className = 'correct';
+      div.textContent = sentences[current];
+      output.appendChild(div);
+
+      // Habilitar guardar oración
+      document.getElementById('saveBtn').disabled = false;
+
+      current++;
+      updateCounter();
+      document.getElementById('userInput').value = '';
+
+      if (current < sentences.length) {
+        speakSentence(sentences[current], 1);
+      } else {
+        alert('¡Completaste todas las oraciones! 🎉');
+        document.getElementById('userInput').disabled = true;
+        document.getElementById('saveBtn').disabled = true;
+      }
+    }
+  }
+
+  function speakSentence(text, rate = 1) {
+    if (!('speechSynthesis' in window)) {
+      alert('Este navegador no soporta síntesis de voz.');
+      return;
+    }
+    speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'en-US';
+    utterance.rate = rate;
+    speechSynthesis.speak(utterance);
+  }
+
+  function revealSentence() {
+    if (current < sentences.length) {
+      alert('La oración es:\n' + sentences[current]);
+    } else {
+      alert('¡Ya completaste todas las oraciones!');
+    }
+  }
+
+  function repeatSentenceNormal() {
+    if (current < sentences.length) {
+      speakSentence(sentences[current], 1);
+    }
+  }
+
+  function repeatSentenceSlow() {
+    if (current < sentences.length) {
+      speakSentence(sentences[current], 0.6);
+    }
+  }
+
+  function saveSentence() {
+    // Guardamos la oración que acabamos de completar (la anterior a current)
+    const indexToSave = current - 1;
+    if (indexToSave < 0 || indexToSave >= sentences.length) return;
+
+    const sentenceToSave = sentences[indexToSave];
+    if (!saved.includes(sentenceToSave)) {
+      saved.push(sentenceToSave);
+      localStorage.setItem('savedSentences', JSON.stringify(saved));
+      renderSavedSentences();
+      updateSavedCount();
+      alert('Oración guardada para practicar.');
+    } else {
+      alert('Esta oración ya está guardada.');
+    }
+
+    document.getElementById('saveBtn').disabled = true;
+  }
+
+  function renderSavedSentences() {
+    const list = document.getElementById('savedSentences');
+    list.innerHTML = '';
+    saved.forEach((sentence, index) => {
+      const li = document.createElement('li');
+      li.textContent = sentence;
+
+      // Botón escuchar
+      const btnSpeak = document.createElement('button');
+      btnSpeak.textContent = '🔊';
+      btnSpeak.title = 'Escuchar oración';
+      btnSpeak.onclick = () => speakSentence(sentence, 1);
+
+      // Botón eliminar
+      const btnDelete = document.createElement('button');
+      btnDelete.textContent = '❌';
+      btnDelete.title = 'Eliminar oración';
+      btnDelete.className = 'deleteBtn';
+      btnDelete.onclick = () => deleteSavedSentence(index);
+
+      li.appendChild(btnSpeak);
+      li.appendChild(btnDelete);
+      list.appendChild(li);
+    });
+  }
+
+  function deleteSavedSentence(index) {
+    if (confirm(`¿Eliminar esta oración guardada?`)) {
+      saved.splice(index, 1);
+      localStorage.setItem('savedSentences', JSON.stringify(saved));
+      renderSavedSentences();
+      updateSavedCount();
+    }
+  }
+
+  function updateSavedCount() {
+    document.getElementById('savedCount').textContent = `Oraciones guardadas: ${saved.length}`;
+  }
+
+  function downloadSentences() {
+    if (saved.length === 0) {
+      alert('No hay oraciones guardadas para descargar.');
+      return;
+    }
+    const text = saved.join('\n\n');
+    const blob = new Blob([text], { type: 'text/plain' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'oraciones_guardadas.txt';
+    link.click();
+  }
+</script>
+</body>
+</html>
