@@ -327,12 +327,14 @@ sentences = lyrics.split(/\n+/).map(s => s.trim()).filter(s => s.length > 0);
 } // <--- Aquí cierra la función correctamente
  
   function revealSentence() {
-    if (current < sentences.length) {
-      alert('La oración es:\n' + sentences[current]);
-    } else {
-      alert('¡Ya completaste todas las oraciones!');
-    }
+  if (current < sentences.length) {
+    // Eliminar comas de la oración
+    let cleanSentence = sentences[current].replace(/,/g, "");
+    alert('La oración es:\n' + cleanSentence);
+  } else {
+    alert('¡Ya completaste todas las oraciones!');
   }
+}
 
   function repeatSentenceNormal() {
     if (current < sentences.length) {
