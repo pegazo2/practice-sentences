@@ -184,6 +184,7 @@ ul#savedSentences li button.deleteBtn:hover {
     <button onclick="revealSentence()">Revelar oración</button>
     <button onclick="repeatSentenceNormal()">Repetir oración (normal)</button>
     <button onclick="repeatSentenceSlow()">Repetir oración (lenta)</button>
+    <button onclick="repeatSentenceVerySlow()">Repetir oración (muy lenta)</button>
     <button onclick="saveSentence()" disabled id="saveBtn">Guardar oración</button>
     <button onclick="openPractice()">Practicar oraciones guardadas</button>
   </div>
@@ -321,6 +322,12 @@ sentences = lyrics.split(/\n+/).map(s => s.trim()).filter(s => s.length > 0);
       speakSentence(sentences[current], 0.6);
     }
   }
+
+  function repeatSentenceVerySlow() {
+  if (current < sentences.length) {
+    speakSentence(sentences[current], 0.3); // velocidad muy lenta
+  }
+}
 
   function saveSentence() {
     // Guardamos la oración que acabamos de completar (la anterior a current)
