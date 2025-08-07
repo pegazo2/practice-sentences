@@ -229,6 +229,7 @@ ul#savedSentences li button.deleteBtn:hover {
     }
    // Dividir por saltos de línea (líneas no vacías)
 sentences = lyrics.split(/\n+/).map(s => s.trim()).filter(s => s.length > 0);
+    
     if (!sentences || sentences.length === 0) {
       alert('No se detectaron oraciones válidas.');
       return;
