@@ -181,6 +181,7 @@ ul#savedSentences li button.deleteBtn:hover {
   <textarea id="lyrics" placeholder="Escribe o pega varias oraciones aquí..."></textarea><br />
   <div>
     <button onclick="startTraining()">Iniciar</button>
+    <button onclick="skipSentence()">Saltar oración</button>
     <button onclick="revealSentence()">Revelar oración</button>
     <button onclick="repeatSentenceNormal()">Repetir oración (normal)</button>
     <button onclick="repeatSentenceSlow()">Repetir oración (lenta)</button>
@@ -301,6 +302,30 @@ sentences = lyrics.split(/\n+/).map(s => s.trim()).filter(s => s.length > 0);
     utterance.lang = 'en-US';
     utterance.rate = rate;
     speechSynthesis.speak(utterance);
+  }
+
+  function skipSentence() {
+  if (current < sentences.length) {
+    // Avanzar la oración actual
+    current++;
+
+    // Actualizar contador y limpiar input y output si quieres
+    updateCounter();
+    document.getElementById('userInput').value = '';
+    document.getElementById('output').innerHTML = '';
+
+    // Deshabilitar botón guardar porque no se completó
+    document.getElementById('saveBtn').disabled = true;
+
+    if (current < sentences.length) {
+      speakSentence(sentences[current], 1); // Reproducir la siguiente oración normal
+      document.getElementById('userInput').disabled = false;
+      document.getElementById('userInput').focus();
+    } else {
+      alert('¡Has terminado todas las oraciones! 🎉');
+      document.getElementById('userInput').disabled = true;
+      document.getElementById('saveBtn').disabled = true;
+    }
   }
 
   function revealSentence() {
