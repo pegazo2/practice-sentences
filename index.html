@@ -227,8 +227,8 @@ ul#savedSentences li button.deleteBtn:hover {
       alert('Por favor pega la letra antes de iniciar.');
       return;
     }
-    // Dividir en oraciones
-    sentences = lyrics.match(/[^.!?]+[.!?]+[\])'"`’”]*|[^.!?]+$/g);
+   // Dividir por saltos de línea (líneas no vacías)
+sentences = lyrics.split(/\n+/).map(s => s.trim()).filter(s => s.length > 0);
     if (!sentences || sentences.length === 0) {
       alert('No se detectaron oraciones válidas.');
       return;
