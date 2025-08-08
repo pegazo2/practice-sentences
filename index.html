@@ -276,38 +276,38 @@ sentences = lyrics.split(/\n+/).map(s => s.trim()).filter(s => s.length > 0);
   }
 
   function checkSentence() {
-    if (current >= sentences.length) return;
+  if (current >= sentences.length) return;
 
-    const inputRaw = document.getElementById('userInput').value;
-const targetRaw = sentences[current];
+  const inputRaw = document.getElementById('userInput').value;
+  const targetRaw = sentences[current];
 
-const input = normalizeSentence(inputRaw);
-const target = normalizeSentence(targetRaw);
+  const input = normalizeSentence(inputRaw);
+  const target = normalizeSentence(targetRaw);
 
-    if (normalize(input) === normalize(target)) {
-      // Mostrar oración correcta
-      const output = document.getElementById('output');
-      const div = document.createElement('div');
-      div.className = 'correct';
-      div.textContent = sentences[current];
-      output.appendChild(div);
+  if (input === target) {
+    // Mostrar oración correcta
+    const output = document.getElementById('output');
+    const div = document.createElement('div');
+    div.className = 'correct';
+    div.textContent = sentences[current];
+    output.appendChild(div);
 
-      // Habilitar guardar oración
-      document.getElementById('saveBtn').disabled = false;
+    // Habilitar guardar oración
+    document.getElementById('saveBtn').disabled = false;
 
-      current++;
-      updateCounter();
-      document.getElementById('userInput').value = '';
+    current++;
+    updateCounter();
+    document.getElementById('userInput').value = '';
 
-      if (current < sentences.length) {
-        speakSentence(sentences[current], 1);
-      } else {
-        alert('¡Completaste todas las oraciones! 🎉');
-        document.getElementById('userInput').disabled = true;
-        document.getElementById('saveBtn').disabled = true;
-      }
+    if (current < sentences.length) {
+      speakSentence(sentences[current], 1);
+    } else {
+      alert('¡Completaste todas las oraciones! 🎉');
+      document.getElementById('userInput').disabled = true;
+      document.getElementById('saveBtn').disabled = true;
     }
   }
+}
 
   function speakSentence(text, rate = 1) {
     if (!('speechSynthesis' in window)) {
