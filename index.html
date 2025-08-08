@@ -248,6 +248,22 @@ sentences = lyrics.split(/\n+/).map(s => s.trim()).filter(s => s.length > 0);
     speakSentence(sentences[current], 1);
   }
 
+  function normalizeSentence(str) {
+  // Convertir a minúsculas
+  str = str.toLowerCase();
+
+  // Mantener solo letras, espacios y apóstrofes en contracciones/posesivos
+  str = str.replace(/[^a-z'\s]/g, '');
+
+  // Eliminar apóstrofes que NO estén entre letras
+  str = str.replace(/(^|[^a-z])'+|'+([^a-z]|$)/g, '$1$2');
+
+  // Reemplazar múltiples espacios por uno solo y quitar espacios al inicio y fin
+  str = str.replace(/\s+/g, ' ').trim();
+
+  return str;
+}
+
   function updateCounter() {
     const counter = document.getElementById('sentenceCounter');
     if (current < sentences.length) {
@@ -262,10 +278,11 @@ sentences = lyrics.split(/\n+/).map(s => s.trim()).filter(s => s.length > 0);
   function checkSentence() {
     if (current >= sentences.length) return;
 
-    const input = document.getElementById('userInput').value.trim().toLowerCase();
-    const target = sentences[current].toLowerCase();
+    const inputRaw = document.getElementById('userInput').value;
+const targetRaw = sentences[current];
 
-    const normalize = str => str.replace(/\s+/g, ' ').trim();
+const input = normalizeSentence(inputRaw);
+const target = normalizeSentence(targetRaw);
 
     if (normalize(input) === normalize(target)) {
       // Mostrar oración correcta
@@ -328,14 +345,7 @@ sentences = lyrics.split(/\n+/).map(s => s.trim()).filter(s => s.length > 0);
  
   function revealSentence() {
   if (current < sentences.length) {
-    let sentence = sentences[current].toLowerCase();
-
-    // Quitar puntuación excepto apóstrofes entre letras
-    // Reemplaza cualquier carácter que no sea letra o apóstrofe válido por espacio vacío
-    let cleanSentence = sentence.replace(/[^a-z'\s]/g, '') 
-      // Quitar apóstrofes que no estén entre letras
-      .replace(/(^|[^a-z])'|'([^a-z]|$)/g, '$1$2');
-
+    const cleanSentence = normalizeSentence(sentences[current]);
     alert('La oración es:\n' + cleanSentence);
   } else {
     alert('¡Ya completaste todas las oraciones!');
