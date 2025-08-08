@@ -328,8 +328,11 @@ sentences = lyrics.split(/\n+/).map(s => s.trim()).filter(s => s.length > 0);
  
   function revealSentence() {
   if (current < sentences.length) {
-    // Eliminar comas de la oración
-    let cleanSentence = sentences[current].replace(/,/g, "");
+    // Eliminar comas y pasar a minúsculas, pero conservar las contracciones
+    let cleanSentence = sentences[current]
+      .toLowerCase()           // todo en minúsculas
+      .replace(/(?!\w+'\w+)[^\w\s]/g, ""); // eliminar puntuación excepto contracciones
+
     alert('La oración es:\n' + cleanSentence);
   } else {
     alert('¡Ya completaste todas las oraciones!');
