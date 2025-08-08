@@ -1,0 +1,48 @@
+function normalizeSentence(str) {
+  // Convertir a minúsculas
+  str = str.toLowerCase();
+
+  // Mantener solo letras, espacios y apóstrofes en contracciones/posesivos
+  str = str.replace(/[^a-z'\s]/g, ''); 
+
+  // Eliminar apóstrofes que NO estén entre letras
+  str = str.replace(/(^|[^a-z])'+|'+([^a-z]|$)/g, '$1$2');
+
+  // Reemplazar múltiples espacios por uno solo y quitar espacios al inicio y fin
+  str = str.replace(/\s+/g, ' ').trim();
+
+  return str;
+}
+
+
+function checkSentence() {
+  if (current >= sentences.length) return;
+
+  const input = document.getElementById('userInput').value.trim();
+  const target = sentences[current];
+
+  const normalizedInput = normalizeSentence(input);
+  const normalizedTarget = normalizeSentence(target);
+
+  if (normalizedInput === normalizedTarget) {
+    const output = document.getElementById('output');
+    const div = document.createElement('div');
+    div.className = 'correct';
+    div.textContent = sentences[current];
+    output.appendChild(div);
+
+    document.getElementById('saveBtn').disabled = false;
+
+    current++;
+    updateCounter();
+    document.getElementById('userInput').value = '';
+
+    if (current < sentences.length) {
+      speakSentence(sentences[current], 1);
+    } else {
+      alert('¡Completaste todas las oraciones! 🎉');
+      document.getElementById('userInput').disabled = true;
+      document.getElementById('saveBtn').disabled = true;
+    }
+  }
+}
