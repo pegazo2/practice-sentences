@@ -181,9 +181,11 @@ ul#savedSentences li button.deleteBtn:hover {
   <textarea id="lyrics" placeholder="Escribe o pega varias oraciones aquí..."></textarea><br />
   <div>
     <button onclick="startTraining()">Iniciar</button>
+    <button onclick="skipSentence()">Saltar oración</button>
     <button onclick="revealSentence()">Revelar oración</button>
     <button onclick="repeatSentenceNormal()">Repetir oración (normal)</button>
     <button onclick="repeatSentenceSlow()">Repetir oración (lenta)</button>
+    <button onclick="repeatSentenceVerySlow()">Repetir oración (muy lenta)</button>
     <button onclick="saveSentence()" disabled id="saveBtn">Guardar oración</button>
     <button onclick="openPractice()">Practicar oraciones guardadas</button>
   </div>
@@ -227,8 +229,9 @@ ul#savedSentences li button.deleteBtn:hover {
       alert('Por favor pega la letra antes de iniciar.');
       return;
     }
-    // Dividir en oraciones
-    sentences = lyrics.match(/[^.!?]+[.!?]+[\])'"`’”]*|[^.!?]+$/g);
+   // Dividir por saltos de línea (líneas no vacías)
+sentences = lyrics.split(/\n+/).map(s => s.trim()).filter(s => s.length > 0);
+    
     if (!sentences || sentences.length === 0) {
       alert('No se detectaron oraciones válidas.');
       return;
@@ -245,6 +248,22 @@ ul#savedSentences li button.deleteBtn:hover {
     speakSentence(sentences[current], 1);
   }
 
+  function normalizeSentence(str) {
+  // Convertir a minúsculas
+  str = str.toLowerCase();
+
+  // Mantener solo letras, espacios y apóstrofes en contracciones/posesivos
+  str = str.replace(/[^a-z'\s]/g, '');
+
+  // Eliminar apóstrofes que NO estén entre letras
+  str = str.replace(/(^|[^a-z])'+|'+([^a-z]|$)/g, '$1$2');
+
+  // Reemplazar múltiples espacios por uno solo y quitar espacios al inicio y fin
+  str = str.replace(/\s+/g, ' ').trim();
+
+  return str;
+}
+
   function updateCounter() {
     const counter = document.getElementById('sentenceCounter');
     if (current < sentences.length) {
@@ -257,37 +276,38 @@ ul#savedSentences li button.deleteBtn:hover {
   }
 
   function checkSentence() {
-    if (current >= sentences.length) return;
+  if (current >= sentences.length) return;
 
-    const input = document.getElementById('userInput').value.trim().toLowerCase();
-    const target = sentences[current].toLowerCase();
+  const inputRaw = document.getElementById('userInput').value;
+  const targetRaw = sentences[current];
 
-    const normalize = str => str.replace(/\s+/g, ' ').trim();
+  const input = normalizeSentence(inputRaw);
+  const target = normalizeSentence(targetRaw);
 
-    if (normalize(input) === normalize(target)) {
-      // Mostrar oración correcta
-      const output = document.getElementById('output');
-      const div = document.createElement('div');
-      div.className = 'correct';
-      div.textContent = sentences[current];
-      output.appendChild(div);
+  if (input === target) {
+    // Mostrar oración correcta
+    const output = document.getElementById('output');
+    const div = document.createElement('div');
+    div.className = 'correct';
+    div.textContent = sentences[current];
+    output.appendChild(div);
 
-      // Habilitar guardar oración
-      document.getElementById('saveBtn').disabled = false;
+    // Habilitar guardar oración
+    document.getElementById('saveBtn').disabled = false;
 
-      current++;
-      updateCounter();
-      document.getElementById('userInput').value = '';
+    current++;
+    updateCounter();
+    document.getElementById('userInput').value = '';
 
-      if (current < sentences.length) {
-        speakSentence(sentences[current], 1);
-      } else {
-        alert('¡Completaste todas las oraciones! 🎉');
-        document.getElementById('userInput').disabled = true;
-        document.getElementById('saveBtn').disabled = true;
-      }
+    if (current < sentences.length) {
+      speakSentence(sentences[current], 1);
+    } else {
+      alert('¡Completaste todas las oraciones! 🎉');
+      document.getElementById('userInput').disabled = true;
+      document.getElementById('saveBtn').disabled = true;
     }
   }
+}
 
   function speakSentence(text, rate = 1) {
     if (!('speechSynthesis' in window)) {
@@ -301,13 +321,36 @@ ul#savedSentences li button.deleteBtn:hover {
     speechSynthesis.speak(utterance);
   }
 
-  function revealSentence() {
+  function skipSentence() {
+  if (current < sentences.length) {
+    // Avanzar la oración actual
+    current++;
+
+    updateCounter();
+    document.getElementById('userInput').value = '';
+    document.getElementById('output').innerHTML = '';
+    document.getElementById('saveBtn').disabled = true;
+
     if (current < sentences.length) {
-      alert('La oración es:\n' + sentences[current]);
+      speakSentence(sentences[current], 1);
+      document.getElementById('userInput').disabled = false;
+      document.getElementById('userInput').focus();
     } else {
-      alert('¡Ya completaste todas las oraciones!');
+      alert('¡Has terminado todas las oraciones! 🎉');
+      document.getElementById('userInput').disabled = true;
+      document.getElementById('saveBtn').disabled = true;
     }
   }
+} // <--- Aquí cierra la función correctamente
+ 
+  function revealSentence() {
+  if (current < sentences.length) {
+    const cleanSentence = normalizeSentence(sentences[current]);
+    alert('La oración es:\n' + cleanSentence);
+  } else {
+    alert('¡Ya completaste todas las oraciones!');
+  }
+}
 
   function repeatSentenceNormal() {
     if (current < sentences.length) {
@@ -320,6 +363,12 @@ ul#savedSentences li button.deleteBtn:hover {
       speakSentence(sentences[current], 0.6);
     }
   }
+
+  function repeatSentenceVerySlow() {
+  if (current < sentences.length) {
+    speakSentence(sentences[current], 0.3); // velocidad muy lenta
+  }
+}
 
   function saveSentence() {
     // Guardamos la oración que acabamos de completar (la anterior a current)
