@@ -92,10 +92,11 @@
   <div id="output"></div>
 
   <div>
-    <button onclick="revealSentence()" id="btnReveal" disabled>Revelar oración</button>
-    <button onclick="repeatSentenceNormal()" id="btnRepeatNormal" disabled>Repetir oración (normal)</button>
-    <button onclick="repeatSentenceSlow()" id="btnRepeatSlow" disabled>Repetir oración (lenta)</button>
-  </div>
+  <button onclick="revealSentence()" id="btnReveal" disabled>Revelar oración</button>
+  <button onclick="repeatSentenceNormal()" id="btnRepeatNormal" disabled>Repetir oración (normal)</button>
+  <button onclick="repeatSentenceSlow()" id="btnRepeatSlow" disabled>Repetir oración (lenta)</button>
+  <button onclick="skipSentence()" id="btnSkip" disabled>⏭️ Saltar oración</button>
+</div>
 
 <script>
   let savedSentences = [];
@@ -104,13 +105,13 @@
   window.onload = function() {
     const savedData = localStorage.getItem('savedSentences');
     if (!savedData) {
-      alert('No tienes oraciones guardadas para practicar. Vuelve a la página principal y guarda algunas.');
+      alert('No tienes oraciones guardadas para practicar.');
       document.getElementById('sentenceCounter').textContent = 'No hay oraciones guardadas.';
       return;
     }
     savedSentences = JSON.parse(savedData);
     if (!savedSentences.length) {
-      alert('No tienes oraciones guardadas para practicar. Vuelve a la página principal y guarda algunas.');
+      alert('No tienes oraciones guardadas para practicar.');
       document.getElementById('sentenceCounter').textContent = 'No hay oraciones guardadas.';
       return;
     }
@@ -132,8 +133,13 @@
     }
   }
 
+  // ✅ Normaliza la frase: solo minúsculas, espacios simples y apóstrofes en contracciones/posesivos
   function normalize(str) {
-    return str.replace(/\s+/g, ' ').trim().toLowerCase();
+    return str
+      .toLowerCase()
+      .replace(/[^\w'\s]|(?!\b\w+'\w\b)'\B/g, "") // Quita símbolos, mantiene ' en contracciones/posesivos
+      .replace(/\s+/g, " ")
+      .trim();
   }
 
   document.getElementById('userInput').addEventListener('input', () => {
@@ -143,21 +149,27 @@
     const target = normalize(savedSentences[current]);
 
     if (input === target) {
-      // Mostrar en output
-      const output = document.getElementById('output');
-      output.textContent += savedSentences[current] + '\n\n';
-
-      current++;
-      updateCounter();
-      document.getElementById('userInput').value = '';
-
-      if (current < savedSentences.length) {
-        speakSentence(savedSentences[current], 1);
-      } else {
-        alert('¡Felicidades! Completaste todas las oraciones guardadas.');
-      }
+      document.getElementById('output').textContent += savedSentences[current] + '\n\n';
+      nextSentence();
     }
   });
+
+  function nextSentence() {
+    current++;
+    updateCounter();
+    document.getElementById('userInput').value = '';
+    if (current < savedSentences.length) {
+      speakSentence(savedSentences[current], 1);
+    } else {
+      alert('¡Felicidades! Completaste todas las oraciones guardadas.');
+    }
+  }
+
+  function skipSentence() {
+    if (current < savedSentences.length) {
+      nextSentence();
+    }
+  }
 
   function speakSentence(text, rate=1) {
     if (!('speechSynthesis' in window)) {
@@ -193,6 +205,7 @@
     document.getElementById('btnReveal').disabled = !enabled;
     document.getElementById('btnRepeatNormal').disabled = !enabled;
     document.getElementById('btnRepeatSlow').disabled = !enabled;
+    document.getElementById('btnSkip').disabled = !enabled;
   }
 </script>
 </body>
